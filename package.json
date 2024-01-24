@@ -25,6 +25,7 @@
     "nodemailer": "^6.9.6",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
+    "phonepesdk": "^0.3.18",
     "phonepesdk-web": "^1.0.7",
     "react-toastify": "^9.1.3",
     "validator": "^13.9.0"

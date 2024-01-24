@@ -4193,6 +4193,11 @@
   "resolved" "https://registry.npmjs.org/phonepesdk-web/-/phonepesdk-web-1.0.7.tgz"
   "version" "1.0.7"
 
+"phonepesdk@^0.3.18":
+  "integrity" "sha512-Y9ABEr1b/x815TZlLO+GmVFhEzqMN2fiNIqe8xYJTCV/GI28KyXlyHfxaZRMxIOkbfB06Rx3Z05vgjK1EyNcUQ=="
+  "resolved" "https://registry.npmjs.org/phonepesdk/-/phonepesdk-0.3.18.tgz"
+  "version" "0.3.18"
+
 "picocolors@^1.0.0":
   "integrity" "sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ=="
   "resolved" "https://registry.npmjs.org/picocolors/-/picocolors-1.0.0.tgz"
