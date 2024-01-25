@@ -36,6 +36,7 @@ if (process.env.NODE_ENV == "PROD") {
   origin = ["https://burlynutrition.com", "https://www.burlynutrition.com"];
 } else {
   origin = ["http://localhost:3000"];
+  // origin = ["https://burlynutrition.com", "https://www.burlynutrition.com"];
 }
 
 module.exports = {
