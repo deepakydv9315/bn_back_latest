@@ -32,7 +32,7 @@ if (process.env.STAGE == "PROD") {
   checkStatusUrl = `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status`;
 }
 
-if (process.env.NODE_ENV == "PROD") {
+if (process.env.STAGE == "PROD") {
   origin = ["https://burlynutrition.com", "https://www.burlynutrition.com"];
 } else {
   origin = ["http://localhost:3000"];
