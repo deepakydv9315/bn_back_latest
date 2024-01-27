@@ -17,8 +17,8 @@ if (process.env.STAGE == "PROD") {
   merchentSaltKey = process.env.PHONE_PAY_MERCHANT_SALT_KEY;
   merchentUserId = "HIGHFLYER INC";
   phonePe_API_URL = "https://api.phonepe.com/apis/hermes/pg/v1/pay";
-  redirectUrl = `${process.env.FRONTEND_URL}/api/v1/redirect`;
-  callBackUrl = `${process.env.FRONTEND_URL}/api/v1/callback`;
+  redirectUrl = `${process.env.BACKEND}/api/v1/redirect`;
+  callBackUrl = `${process.env.BACKEND}/api/v1/callback`;
   checkStatusUrl = `https://api.phonepe.com/apis/hermes/pg/v1/status`;
 } else {
   merchentId = "PGTESTPAYUAT101";
