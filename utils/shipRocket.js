@@ -24,6 +24,7 @@ const shipRocketAuth = async () => {
     );
 
     CacheStorage.set("shipRocketToken", response.data.token);
+    console.log(CacheStorage.get("shipRocketToken"));
   } catch (error) {
     console.log(error.message);
   }
@@ -82,12 +83,10 @@ const shipRocketPlaceAnOrder = async (order) => {
   });
 
   try {
-    let token = "";
-    if (!CacheStorage.has("shipRocketToken")) {
-      token = process.env.SHIP_ROCKET_TOKEN;
-    } else {
-      token = CacheStorage.get("shipRocketToken");
-    }
+    var token = CacheStorage.get().get("shipRocketToken");
+
+    console.log("Payload >>> ", JSON.parse(payload));
+    console.log("Line 92 >> ", token);
     const response = await axios.post(
       `${process.env.SHIP_ROCKET_URL}/orders/create/adhoc`,
       payload,
@@ -99,15 +98,14 @@ const shipRocketPlaceAnOrder = async (order) => {
       }
     );
 
-    console.log(response);
-    
+    console.log("Line 102 >> ", response.data);
 
     if (response.status === 200) {
       return response.data;
     }
   } catch (error) {
     console.log(error);
-    
+
     console.error("ShipRocket Error: ", error.message); // Log the error message
   }
 };

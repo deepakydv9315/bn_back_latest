@@ -76,8 +76,6 @@ const placeOrder = async (req, res) => {
       }),
     });
 
-    console.log(order);
-
     const payload = JSON.stringify({
       merchantId: merchentId,
       merchantTransactionId: `TRX-${Date.now()}`,
@@ -188,7 +186,7 @@ const redirect = async (req, res) => {
 
       // ? Now i Have To Get All Data Related To Order By Id
       const shipRocketData = await shipRocketPlaceAnOrder(order);
-      console.log(shipRocketData.status_code);
+      console.log("Shiprocket Status Code >> ", shipRocketData.status_code);
       if (shipRocketData.status_code == 1) {
         // Store Shiprocket Data in Order
         const order = await OrderModel.findOneAndUpdate(
