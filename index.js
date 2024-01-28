@@ -14,6 +14,7 @@ const GoogleStrategy = require("./utils/Provider");
 const passport = require("passport");
 const session = require("express-session");
 const { shipRocketAuth } = require("./utils/shipRocket");
+const cron = require("node-cron");
 
 const { origin } = require("./config/config");
 
@@ -51,6 +52,15 @@ app.use(cookie());
 app.use(passport.authenticate("session"));
 app.use(passport.initialize());
 app.use(passport.session());
+
+shipRocketAuth(); // ? Run Imidiatly
+// ? Every 10 Second
+// cron.schedule('*/10 * * * * *', function() {
+// ? Every 25 Days
+cron.schedule("0 0 */25 * *", function () {
+  console.log("Running shipRocketAuth() every 25 days");
+  shipRocketAuth();
+});
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
