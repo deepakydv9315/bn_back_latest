@@ -207,8 +207,9 @@ const redirect = async (req, res) => {
         const eMailData = await transporter.sendMail({
           from: process.env.EMAIL_ID,
           to: order.shippingInfo.email,
-          subject: "Order Placed Successfully",
-          text: `Your Order Has Been Placed Successfully \nOrder Id is ${order.orderId} \nShipment Id is ${shipRocketData.shipment_id}`,
+          subject: "Yay! Your order is confirmed!",
+          text: `Thank you for trusting us! We are thrilled to confirm that your order, ${order.orderId}, has been received and is being processed. Here is Shipment Id ${shipRocketData.shipment_id} \nWe are excited to get your order to you as soon as possible and will keep you updated on the status of your shipment. If you have any questions or concerns, please don’t hesitate to contact us. \n\nWarm Regards,\nTeam Burly Nutrition`,
+          // text: `Your Order Has Been Placed Successfully \nOrder Id is ${order.orderId} \nShipment Id is ${shipRocketData.shipment_id}`,
         });
 
         // Redirect to Success Page
