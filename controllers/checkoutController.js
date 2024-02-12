@@ -3,15 +3,7 @@ const { success, error } = require("../utils/responseWrapper");
 const crypto = require("crypto");
 const dotenv = require("dotenv");
 const axios = require("axios");
-const {
-  merchentId,
-  merchentSaltIndex,
-  merchentSaltKey,
-  merchentUserId,
-  phonePe_API_URL,
-  callBackUrl,
-  redirectUrl,
-} = require("../config/config");
+const { phonePe_API_URL } = require("../config/config");
 
 dotenv.config({ path: "../config/config.env" });
 const { checkTransactionStatus } = require("../utils/checkOrderStatus");
@@ -45,86 +37,28 @@ const getOrberById = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
-    const order = await OrderModel.create({
-      user: req.user._id,
-      orderId: req.body.orderID,
-      shippingInfo: {
-        name: req.body.name,
-        email: req.body.email,
-        phoneNo: req.body.phone,
-        address: req.body.address,
-        postalCode: req.body.pincode,
-        city: req.body.city,
-        state: req.body.state,
-        country: "India",
-      },
-      notes: req.body.notes,
-      coupon: req.body.coupon,
-
-      itemsPrice: req.body.total,
-      totalPrice: req.body.total,
-      status: "Pending",
-
-      orderItems: req.body.products.map((order) => {
-        return {
-          name: order.name,
-          quantity: order.productDefaultPrice.quantity,
-          price: order.productDefaultPrice.price,
-          sku: order.productDefaultPrice.sku,
-          product: order._id,
-        };
-      }),
-    });
-
-    const payload = JSON.stringify({
-      merchantId: merchentId,
-      merchantTransactionId: `TRX-${Date.now()}`,
-      merchantUserId: merchentUserId,
-      amount: parseInt(req.body.total) * 100,
-      redirectUrl: redirectUrl,
-      redirectMode: "POST",
-      callbackUrl: callBackUrl,
-      mobileNumber: req.body.phone,
-      paymentInstrument: {
-        type: "PAY_PAGE",
-      },
-    });
-
-    const base64_encoded = Buffer.from(payload).toString("base64");
-
-    const concatenatedString = base64_encoded + "/pg/v1/pay" + merchentSaltKey;
-
-    const hash = crypto
-      .createHash("sha256")
-      .update(concatenatedString)
-      .digest("hex");
-
-    const X_Verify = hash + "###" + merchentSaltIndex;
-
-    axios
-      .post(
-        phonePe_API_URL,
-        { request: base64_encoded },
-        {
-          headers: {
-            accept: "application/json",
-            "Content-Type": "application/json",
-            "X-VERIFY": X_Verify,
-          },
-        }
-      )
-      .then(async (response) => {
-        await OrderModel.findByIdAndUpdate(order._id, {
-          paymentInfo: {
-            id: response.data.data.merchantTransactionId,
-            status: "Paid",
-          },
-        });
-        res.status(200).json(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
+    const { paymentMethod } = req.body;
+    if (paymentMethod === "Online") {
+      await OrderModel.findByIdAndUpdate(req.order._id, {
+        paymentInfo: {
+          id: req.phonePe.data.merchantTransactionId,
+          status: "Paid",
+        },
       });
+
+      res.send(
+        success(200, {
+          url: req.phonePe.data.instrumentResponse.redirectInfo.url,
+        })
+      );
+    } else if (paymentMethod === "COD") {
+      res.send(
+        success(200, {
+          message: "Order Place Successfully",
+          orderId: req.order.orderId,
+        })
+      );
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -185,7 +119,7 @@ const redirect = async (req, res) => {
       );
 
       // ? Now i Have To Get All Data Related To Order By Id
-      const shipRocketData = await shipRocketPlaceAnOrder(order);
+      const shipRocketData = await shipRocketPlaceAnOrder(order, "Online");
       console.log("Shiprocket Status Code >> ", shipRocketData.status_code);
       if (shipRocketData.status_code == 1) {
         // Store Shiprocket Data in Order

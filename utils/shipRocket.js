@@ -29,7 +29,7 @@ const shipRocketAuth = async () => {
   }
 };
 
-const shipRocketPlaceAnOrder = async (order) => {
+const shipRocketPlaceAnOrder = async (order, method) => {
   const payload = JSON.stringify({
     order_id: order.orderId,
     order_date: new Date().toISOString().slice(0, 16).replace("T", " "),
@@ -69,7 +69,7 @@ const shipRocketPlaceAnOrder = async (order) => {
         hsn: "", // Leave Blank
       };
     }),
-    payment_method: "Prepaid",
+    payment_method: method === "COD" ? "COD" : "Prepaid",
     shipping_charges: 0,
     giftwrap_charges: 0,
     transaction_charges: 0,
@@ -96,14 +96,10 @@ const shipRocketPlaceAnOrder = async (order) => {
       }
     );
 
-    console.log("Line 102 >> ", response.data);
-
     if (response.status === 200) {
       return response.data;
     }
   } catch (error) {
-    console.log(error);
-
     console.error("ShipRocket Error: ", error.message); // Log the error message
   }
 };

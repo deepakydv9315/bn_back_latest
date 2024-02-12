@@ -1,6 +1,7 @@
 const router = require("express").Router();
 
 const { isAutheticatedUser } = require("../middlewares/isAuthenticated");
+const { checkDelevery } = require("../middlewares/delivery.middleware");
 
 // Controller
 const {
@@ -13,7 +14,7 @@ const {
 // To Create An Inovice
 
 // Validate Coupon and Validate Product First
-router.route("/placeOrder").post(isAutheticatedUser, placeOrder);
+router.route("/placeOrder").post(isAutheticatedUser, checkDelevery, placeOrder);
 
 // For Order
 router.route("/order/:id").get(isAutheticatedUser, getOrberById);
