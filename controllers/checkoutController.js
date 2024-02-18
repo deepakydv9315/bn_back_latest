@@ -52,6 +52,39 @@ const placeOrder = async (req, res) => {
         })
       );
     } else if (paymentMethod === "COD") {
+      // Send Email To User
+      const order = req.order;
+      const shipRocketData = req.cod;
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_ID,
+        to: order.shippingInfo.email,
+        subject: "Yay! Your order is confirmed!",
+        text: `Thank you for trusting us! We are thrilled to confirm that your order, ${order.orderId}, has been received and is being processed. Here is Shipment Id ${shipRocketData.shipment_id} \nWe are excited to get your order to you as soon as possible and will keep you updated on the status of your shipment. If you have any questions or concerns, please don’t hesitate to contact us. \n\nWarm Regards,\nTeam Burly Nutrition`,
+      });
+
+      const adminText = `
+      New Order Received
+      \nName : ${order.shippingInfo.name} 
+      \nOrder Id is ${order.orderId}
+      \nProduct List : ${order.orderItems.map(
+        (item) => `${item.quantity} x ${item.name}`
+      )}
+      \nPayment Mode : Postpaid
+      \nAmmount : ${order.totalPrice}
+      \nMobile Number : ${order.shippingInfo.phoneNo}
+      \nAddress : ${order.shippingInfo.address}, ${order.shippingInfo.city}, ${
+        order.shippingInfo.state
+      }, ${order.shippingInfo.postalCode}
+      \nShipment Id is ${shipRocketData.shipment_id}
+      `;
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_ID,
+        to: "support@burlynutrition.com",
+        subject: "New Order Received",
+        text: adminText,
+      });
       res.send(
         success(200, {
           message: "Order Place Successfully",
@@ -120,7 +153,6 @@ const redirect = async (req, res) => {
 
       // ? Now i Have To Get All Data Related To Order By Id
       const shipRocketData = await shipRocketPlaceAnOrder(order, "Online");
-      console.log("Shiprocket Status Code >> ", shipRocketData.status_code);
       if (shipRocketData.status_code == 1) {
         // Store Shiprocket Data in Order
         const order = await OrderModel.findOneAndUpdate(
@@ -138,12 +170,34 @@ const redirect = async (req, res) => {
         );
 
         // Send Email To User
-        const eMailData = await transporter.sendMail({
+        await transporter.sendMail({
           from: process.env.EMAIL_ID,
           to: order.shippingInfo.email,
           subject: "Yay! Your order is confirmed!",
           text: `Thank you for trusting us! We are thrilled to confirm that your order, ${order.orderId}, has been received and is being processed. Here is Shipment Id ${shipRocketData.shipment_id} \nWe are excited to get your order to you as soon as possible and will keep you updated on the status of your shipment. If you have any questions or concerns, please don’t hesitate to contact us. \n\nWarm Regards,\nTeam Burly Nutrition`,
-          // text: `Your Order Has Been Placed Successfully \nOrder Id is ${order.orderId} \nShipment Id is ${shipRocketData.shipment_id}`,
+        });
+
+        const adminText = `
+        New Order Received
+        \nName : ${order.shippingInfo.name} 
+        \nOrder Id is ${order.orderId}
+        \nProduct List : ${order.orderItems.map(
+          (item) => `${item.quantity} x ${item.name}`
+        )}
+        \nPayment Mode : Prepaid
+        \nAmmount : ${order.totalPrice}
+        \nMobile Number : ${order.shippingInfo.phoneNo}
+        \nAddress : ${order.shippingInfo.address}, ${
+          order.shippingInfo.city
+        }, ${order.shippingInfo.state}, ${order.shippingInfo.postalCode}
+        \nShipment Id is ${shipRocketData.shipment_id}
+        `;
+
+        await transporter.sendMail({
+          from: process.env.EMAIL_ID,
+          to: "support@burlynutrition.com",
+          subject: "New Order Received",
+          text: adminText,
         });
 
         // Redirect to Success Page
@@ -151,18 +205,6 @@ const redirect = async (req, res) => {
           `${process.env.FRONTEND_URL}/orderSuccess/${order.orderId}`
         );
       }
-
-      // Send Email To User
-      // await sendEmail({
-      //   email: req.user.email,
-      //   subject: "Order Placed Successfully",
-      //   message: "Your Order Has Been Placed Successfully",
-      // });
-
-      // Place order to Shiprocket
-
-      // Redirect to Success Page
-      // window.location.href = `${process.env.FRONTEND_URL}/orderSuccess/${req.body.transactionId}`;
     } else {
       res.redirect(`${process.env.FRONTEND_URL}/checkout`);
     }

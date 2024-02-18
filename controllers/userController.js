@@ -3,10 +3,14 @@ const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendToken = require("../utils/jwtToken");
 const { error, success } = require("../utils/responseWrapper");
-const { sendEmail } = require("../utils/sendMail");
+
 const crypto = require("crypto");
 const cloudinary = require("cloudinary");
 const OrderModel = require("../models/OrderModel");
+const transporter = require("../config/emailTransport");
+
+const fs = require("fs");
+const path = require("path");
 
 exports.registerUser = async (req, res, next) => {
   try {
@@ -87,7 +91,6 @@ exports.getUserOrders = catchAsyncErrors(async (req, res, next) => {
   } catch (error) {
     console.log(error);
   }
-  
 });
 
 //Update user Password
@@ -202,35 +205,30 @@ exports.forgotPassword = async (req, res) => {
     }
 
     // Get ResetPassword Token
-    const resetToken = user.getResetPasswordToken();
+    const resetToken = await user.getResetPasswordToken();
 
     await user.save({ validateBeforeSave: false });
 
-    const resetPasswordUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/password/reset/${resetToken}`;
+    const resetPasswordUrl = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
 
-    const message = `${resetPasswordUrl}`;
+    let htmlContent = fs.readFileSync(
+      path.resolve(__dirname, "../utils/forgetPassword.html"),
+      "utf8"
+    );
 
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: `GlutenFree Password Recovery`,
-        message,
-      });
+    htmlContent = htmlContent.replace("##RESET_URL##", resetPasswordUrl);
 
-      res.status(200).json({
-        success: true,
-        message: `Email sent to ${user.email} successfully`,
-      });
-    } catch (e) {
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
+    await transporter.sendMail({
+      from: process.env.EMAIL_ID,
+      to: user.email,
+      subject: "Burly Nutrition Password Recovery",
+      html: htmlContent,
+    });
 
-      await user.save({ validateBeforeSave: false });
-
-      return res.send(error(500, e.message));
-    }
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${user.email} successfully`,
+    });
   } catch (e) {
     res.send(error(500, e.message));
   }
