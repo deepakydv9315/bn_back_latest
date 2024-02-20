@@ -54,7 +54,7 @@ const checkDelevery = async (req, res, next) => {
       return next();
     }
   } catch (err) {
-    console.log(err.message);
+    console.log("Check Delivery () >>> ", err.message);
     res.status(500).json({
       success: false,
       data: "Check Delevery Failed",

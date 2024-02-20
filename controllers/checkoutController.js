@@ -10,6 +10,9 @@ const { checkTransactionStatus } = require("../utils/checkOrderStatus");
 const transporter = require("../config/emailTransport");
 const { shipRocketPlaceAnOrder } = require("../utils/shipRocket");
 
+const path = require("path");
+const fs = require("fs");
+
 const getOrberById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -56,11 +59,24 @@ const placeOrder = async (req, res) => {
       const order = req.order;
       const shipRocketData = req.cod;
 
+      let htmlContent = fs.readFileSync(
+        path.resolve(__dirname, "../utils/orderPlace.html"),
+        "utf8"
+      );
+      htmlContent = htmlContent.replace(/###ORDER_ID###/g, order.orderId);
+      htmlContent = htmlContent.replace(/###TOTAL_PRICE###/g, order.totalPrice);
+      htmlContent = htmlContent.replace(
+        /###TOTAL_ITEMS###/g,
+        order.orderItems
+          .map((item) => `<span>${item.quantity} x ${item.name}</span>`)
+          .join("")
+      );
+
       await transporter.sendMail({
         from: process.env.EMAIL_ID,
         to: order.shippingInfo.email,
         subject: "Yay! Your order is confirmed!",
-        text: `Thank you for trusting us! We are thrilled to confirm that your order, ${order.orderId}, has been received and is being processed. Here is Shipment Id ${shipRocketData.shipment_id} \nWe are excited to get your order to you as soon as possible and will keep you updated on the status of your shipment. If you have any questions or concerns, please don’t hesitate to contact us. \n\nWarm Regards,\nTeam Burly Nutrition`,
+        html: htmlContent,
       });
 
       const adminText = `
@@ -101,6 +117,7 @@ const placeOrder = async (req, res) => {
   }
 };
 
+// ? Not Use Yet
 const checkout = async (req, res) => {
   try {
     // send email to user
@@ -169,12 +186,28 @@ const redirect = async (req, res) => {
           }
         );
 
+        let htmlContent = fs.readFileSync(
+          path.resolve(__dirname, "../utils/orderPlace.html"),
+          "utf8"
+        );
+        htmlContent = htmlContent.replace(/###ORDER_ID###/g, order.orderId);
+        htmlContent = htmlContent.replace(
+          /###TOTAL_PRICE###/g,
+          order.totalPrice
+        );
+        htmlContent = htmlContent.replace(
+          /###TOTAL_ITEMS###/g,
+          order.orderItems
+            .map((item) => `<span>${item.quantity} x ${item.name}</span>`)
+            .join("")
+        );
+
         // Send Email To User
         await transporter.sendMail({
           from: process.env.EMAIL_ID,
           to: order.shippingInfo.email,
           subject: "Yay! Your order is confirmed!",
-          text: `Thank you for trusting us! We are thrilled to confirm that your order, ${order.orderId}, has been received and is being processed. Here is Shipment Id ${shipRocketData.shipment_id} \nWe are excited to get your order to you as soon as possible and will keep you updated on the status of your shipment. If you have any questions or concerns, please don’t hesitate to contact us. \n\nWarm Regards,\nTeam Burly Nutrition`,
+          html: htmlContent,
         });
 
         const adminText = `
